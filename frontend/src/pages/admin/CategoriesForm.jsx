@@ -1,8 +1,9 @@
 import { useContext, useState, useEffect } from "react";
-import { AuthContext } from "../../context/AuthContext";
-import api from "../../api/axios";
+import { AuthContext } from "../../auth/AuthContext";
+import * as categoryApi from "../../api/categoryApi";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import Loader from "../../components/common/Loader";
 
 // Inline Icons to avoid extra dependencies
 const IconArrowLeft = () => (
@@ -17,7 +18,7 @@ const IconAlertCircle = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
 );
 
-export default function CategoriesForm() {
+export default function AdminCategoriesForm() {
     const { register, handleSubmit, reset, formState: { errors } } = useForm({
         defaultValues: {
             name: "",
@@ -44,21 +45,26 @@ export default function CategoriesForm() {
     // Fetch existing category data for edit mode
     useEffect(() => {
         if (isEdit) {
-            setFetching(true);
-            api.get(`/categories/${id}`)
-                .then(response => {
-                    const category = response.data.category;
-                    reset({
-                        name: category.name,
-                        description: category.description || "",
-                        status: category.status
-                    });
-                })
-                .catch(error => {
-                    console.error("Error fetching category: ", error);
-                    setServerError("Failed to fetch category details.");
-                })
-                .finally(() => setFetching(false));
+            const fetchCategory = async () => {
+                try {
+                    setFetching(true);
+                    const response = await categoryApi.getCategoryById(id);
+                    if (response.data.success) {
+                        const category = response.data.category;
+                        reset({
+                            name: category.name,
+                            description: category.description || "",
+                            status: category.status
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error fetching category:", error);
+                    setServerError("Failed to retrieve category details.");
+                } finally {
+                    setFetching(false);
+                }
+            };
+            fetchCategory();
         }
     }, [id, isEdit, reset]);
 
@@ -67,26 +73,24 @@ export default function CategoriesForm() {
             setLoading(true);
             setServerError(null);
 
-            // Ensure status is sent as number/boolean as expected by backend
             const payload = {
                 ...data,
                 status: Number(data.status)
             };
 
             if (isEdit) {
-                await api.put(`/categories/${id}`, payload);
+                await categoryApi.updateCategory(id, payload);
             } else {
-                await api.post('/categories', payload);
+                await categoryApi.createCategory(payload);
             }
             navigate('/admin/categories');
         } catch (error) {
             console.error("Submission error:", error);
             if (error.response?.data?.errors) {
-                // Handle Laravel validation errors if needed, or generic message
                 const firstError = Object.values(error.response.data.errors)[0][0];
                 setServerError(firstError);
             } else {
-                setServerError(error.response?.data?.message || 'Something went wrong while saving.');
+                setServerError(error.response?.data?.message || 'Action failed. Please check your network.');
             }
         } finally {
             setLoading(false);
@@ -94,132 +98,118 @@ export default function CategoriesForm() {
     };
 
     if (fetching) {
-        return (
-            <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-            </div>
-        );
+        return <Loader text="Retrieving category details..." />;
     }
 
     return (
         <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl mx-auto">
-                {/* Back Link */}
                 <Link
                     to="/admin/categories"
-                    className="inline-flex items-center text-sm text-gray-500 hover:text-indigo-600 mb-6 transition-colors"
+                    className="inline-flex items-center text-sm font-black text-gray-500 hover:text-primary mb-6 transition-all"
                 >
-                    <span className="mr-2"><IconArrowLeft /></span> Back to Categories
+                    <span className="mr-2"><IconArrowLeft /></span> Back to Management
                 </Link>
 
-                <div className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
-                    <div className="px-8 py-6 bg-white border-b border-gray-100">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            {isEdit ? "Update Category" : "Create New Category"}
+                <div className="bg-white shadow-2xl shadow-primary/10 rounded-[2rem] overflow-hidden border border-gray-100">
+                    <div className="px-10 py-8 bg-white border-b border-gray-50">
+                        <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+                            {isEdit ? "Update Sector" : "Initialize New Category"}
                         </h2>
-                        <p className="mt-1 text-sm text-gray-500">
-                            {isEdit ? "Modify the details of the existing category." : "Fill in the details to add a new job category."}
+                        <p className="mt-1 text-sm text-gray-500 font-medium">
+                            {isEdit ? "Edit the classification details." : "Add a new vertical to the job marketplace."}
                         </p>
                     </div>
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
-                        {/* Server Error Alert */}
+                    <form onSubmit={handleSubmit(onSubmit)} className="p-10 space-y-8">
                         {serverError && (
-                            <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-md flex items-start">
-                                <span className="text-red-500 mt-0.5 mr-3 flex-shrink-0"><IconAlertCircle /></span>
-                                <span className="text-sm text-red-700 font-medium">{serverError}</span>
+                            <div className="p-5 bg-red-50 border-l-4 border-red-500 rounded-xl flex items-start shadow-sm shadow-red-100">
+                                <span className="text-red-500 mr-4 shrink-0"><IconAlertCircle /></span>
+                                <span className="text-sm text-red-700 font-bold tracking-tight">{serverError}</span>
                             </div>
                         )}
 
-                        <div className="grid grid-cols-1 gap-6">
-                            {/* Category Name */}
+                        <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Category Name
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">
+                                    Display Name
                                 </label>
                                 <input
                                     type="text"
                                     disabled={loading}
-                                    placeholder="e.g. Software Development"
+                                    placeholder="e.g. Engineering & Technology"
                                     {...register("name", {
-                                        required: "Category name is required",
-                                        maxLength: { value: 100, message: "Maximum 100 characters" }
+                                        required: "Name is essential",
+                                        maxLength: { value: 100, message: "Limit reached (100 chars)" }
                                     })}
-                                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition
-                                        ${errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200'}
-                                        disabled:bg-gray-50 disabled:cursor-not-allowed`}
+                                    className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl focus:ring-4 focus:ring-primary/10 focus:bg-white outline-none transition-all font-bold text-gray-900
+                                        ${errors.name ? 'border-red-200' : 'border-gray-100'}
+                                        disabled:opacity-50`}
                                 />
                                 {errors.name && (
-                                    <p className="mt-1 text-xs text-red-600 font-medium">{errors.name.message}</p>
+                                    <p className="mt-2 text-xs text-red-500 font-black">{errors.name.message}</p>
                                 )}
                             </div>
 
-                            {/* Category Description */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Description
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">
+                                    Market Description
                                 </label>
                                 <textarea
                                     disabled={loading}
-                                    placeholder="Brief description of this category..."
+                                    placeholder="Describe the scope of this industry..."
                                     rows="4"
                                     {...register("description")}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition disabled:bg-gray-50 disabled:cursor-not-allowed resize-none"
+                                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:bg-white outline-none transition-all font-medium text-gray-600 disabled:opacity-50 resize-none"
                                 />
                             </div>
 
-                            {/* Category Status */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Availability Status
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">
+                                    Platform Visibility
                                 </label>
-                                <select
-                                    disabled={loading}
-                                    {...register("status", { required: true })}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition disabled:bg-gray-50 disabled:cursor-not-allowed appearance-none"
-                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.5em' }}
-                                >
-                                    <option value={1}>Active</option>
-                                    <option value={0}>Inactive</option>
-                                </select>
-                                <p className="mt-2 text-xs text-gray-500 italic">
-                                    Inactive categories won't be visible to users when posting or searching jobs.
-                                </p>
+                                <div className="relative">
+                                    <select
+                                        disabled={loading}
+                                        {...register("status", { required: true })}
+                                        className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:bg-white outline-none transition-all font-bold text-gray-900 appearance-none disabled:opacity-50"
+                                    >
+                                        <option value={1}>Public / Active</option>
+                                        <option value={0}>Internal / Hidden</option>
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-5 pointer-events-none text-gray-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="pt-4 flex items-center gap-4">
+                        <div className="pt-6 flex flex-col md:flex-row gap-4">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 flex items-center justify-center px-6 py-3 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                                className="flex-1 flex items-center justify-center px-8 py-4 rounded-2xl bg-primary text-white font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/10 hover:bg-primary-dark hover:shadow-primary/20 transition-all active:scale-95 disabled:opacity-50"
                             >
                                 {loading ? (
-                                    <div className="flex items-center">
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Saving...
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        Processing...
                                     </div>
                                 ) : (
                                     <div className="flex items-center">
                                         <span className="mr-2"><IconSave /></span>
-                                        {isEdit ? "Save Changes" : "Create Category"}
+                                        {isEdit ? "Update Registry" : "Initialize Category"}
                                     </div>
                                 )}
                             </button>
 
-                            {!loading && (
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/admin/categories')}
-                                    className="px-6 py-3 border border-gray-300 rounded-xl text-base font-semibold text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                            )}
+                            <button
+                                type="button"
+                                onClick={() => navigate('/admin/categories')}
+                                className="px-8 py-4 bg-gray-100 text-gray-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all active:scale-95"
+                            >
+                                Discard
+                            </button>
                         </div>
                     </form>
                 </div>

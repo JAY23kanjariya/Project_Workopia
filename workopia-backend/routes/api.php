@@ -31,6 +31,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/categories/{id}', [CategoryController::class, 'update']);
         Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
 
+        // Job post management routes for Admin
+        Route::delete('/admin/job-posts/{id}', [JobPostController::class, 'destroy']);
+
         // Dashboard route for Admin
         Route::get('/admin/dashboard', [DashboardController::class, 'adminDashboard']);
 

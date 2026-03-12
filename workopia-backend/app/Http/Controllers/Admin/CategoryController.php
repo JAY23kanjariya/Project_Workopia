@@ -10,10 +10,15 @@ use Illuminate\Support\Facades\Validator;
 class CategoryController extends Controller
 {
     // 🔹 Get All Categories (Anyone logged in)
-    public function index(){
+    public function index(Request $request){
 
-        // Fetch all categories with pagination (10 per page)
-        $categories = Category::latest()->paginate(10);
+        // Fetch all categories without pagination if 'all=true'
+        if ($request->has('all') && $request->all == 'true') {
+            $categories = Category::latest()->get();
+        } else {
+            // Fetch all categories with pagination (10 per page)
+            $categories = Category::latest()->paginate(10);
+        }
 
         // Return response
         return response()->json([

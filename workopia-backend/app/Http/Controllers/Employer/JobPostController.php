@@ -26,6 +26,11 @@ class JobPostController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
+        // Apply filters for Filter by Employer
+        if ($request->has('employer_id')) {
+            $query->where('employer_id', $request->employer_id);
+        }
+
         // return paginated results (10 per page)
         $jobPosts = $query->latest()->paginate(10);
 
@@ -60,6 +65,7 @@ class JobPostController extends Controller
         $jobPost = JobPost::create([
             'title' => $request->title,
             'category_id' => $request->category_id, 
+            'employer_id' => $request->user()->id, // Automatically set employer_id
             'location' => $request->location,
             'description' => $request->description,
             'status' => $request->status,
