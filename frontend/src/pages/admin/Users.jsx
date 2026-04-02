@@ -1,177 +1,141 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import * as jobApi from "../../api/jobApi";
+import { adminGetUser, adminDeleteUser } from "../../api/adminApi";
 import Loader from "../../components/common/Loader";
 import Pagination from "../../components/common/Pagination";
 
-// Icons (same as yours)
+export default function UsersPage() {
+  const [users, setUsers] = useState([]);
+  const [pagination, setPagination] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export default function AdminJobs() {
-    const [jobs, setJobs] = useState([]);
-    const [pagination, setPagination] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
 
-    const [page, setPage] = useState(1);
+  // Search input
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
 
-    // ✅ NEW: separate input + debounced search
-    const [searchInput, setSearchInput] = useState("");
-    const [search, setSearch] = useState("");
+  // Row deletion loading
+  const [deletingId, setDeletingId] = useState(null);
 
-    // ✅ NEW: delete loading per row
-    const [deletingId, setDeletingId] = useState(null);
+  // Debounce search input
+  useEffect(() => {
+    const delay = setTimeout(() => setSearch(searchInput), 500);
+    return () => clearTimeout(delay);
+  }, [searchInput]);
 
-    // ✅ Debounce search
-    useEffect(() => {
-        const delay = setTimeout(() => {
-            setSearch(searchInput);
-        }, 500);
+  // Reset page on search
+  useEffect(() => setPage(1), [search]);
 
-        return () => clearTimeout(delay);
-    }, [searchInput]);
+  // Fetch users
+  const fetchUsers = async (pageNumber = 1) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    // ✅ Reset page when search changes
-    useEffect(() => {
-        setPage(1);
-    }, [search]);
+      const params = { page: pageNumber, search };
+      const res = await adminGetUser(params);
 
-    const fetchAllJobs = async (pageNumber = 1) => {
-        try {
-            setLoading(true);
-            setError(null);
+      if (res.data.success) {
+        setUsers(res.data.users?.data || res.data.users || []);
+        setPagination({
+          current_page: res.data.users?.current_page || 1,
+          last_page: res.data.users?.last_page || 1,
+          total: res.data.users?.total || res.data.users?.length || users.length,
+        });
+      } else {
+        setError("Failed to fetch users");
+      }
+    } catch (err) {
+      console.error("Fetch users error:", err);
+      setError("Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            const params = {
-                page: pageNumber,
-                title: search
-            };
+  useEffect(() => {
+    fetchUsers(page);
+  }, [page, search]);
 
-            const response = await jobApi.getJobs(params);
+  // Delete user
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
 
-            if (response.data.success) {
-                setJobs(response.data.jobPosts?.data || []);
-                setPagination({
-                    current_page: response.data.jobPosts?.current_page || 1,
-                    last_page: response.data.jobPosts?.last_page || 1,
-                    total: response.data.jobPosts?.total || 0
-                });
-            }
-        } catch (err) {
-            console.error("Fetch jobs error:", err);
-            setError("Failed to load jobs.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+      setDeletingId(id);
+      await adminDeleteUser(id);
+      fetchUsers(page);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete user");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
-    useEffect(() => {
-        fetchAllJobs(page);
-    }, [page, search]);
+  return (
+    <div className="min-h-screen bg-gray-50 py-10 px-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <h2 className="text-3xl font-black mb-6">Users</h2>
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Delete this job?")) return;
+        {/* Search */}
+        <input
+          type="text"
+          placeholder="Search users..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          className="mb-6 w-full px-4 py-3 border rounded-xl"
+        />
 
-        try {
-            setDeletingId(id);
+        {/* Content */}
+        <div className="bg-white rounded-2xl shadow overflow-hidden">
+          {loading ? (
+            <Loader text="Loading users..." />
+          ) : error ? (
+            <div className="p-6 text-red-500">{error}</div>
+          ) : users.length === 0 ? (
+            <div className="p-10 text-center text-gray-500">No users found</div>
+          ) : (
+            <table className="min-w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="p-4 text-left">Name</th>
+                  <th className="p-4 text-left">Email</th>
+                  <th className="p-4 text-left">Role</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.id} className="border-t">
+                    <td className="p-4 font-bold">{user.name}</td>
+                    <td className="p-4">{user.email}</td>
+                    <td className="p-4">{user.role_id === 1 ? "Admin" : "User"}</td>
+                    <td className="p-4 text-right">
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        disabled={deletingId === user.id}
+                        className="text-red-600"
+                      >
+                        {deletingId === user.id ? "..." : "Delete"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
 
-            const response = await jobApi.adminDeleteJob(id);
-
-            if (response.data.success) {
-                fetchAllJobs(page);
-            }
-        } catch (err) {
-            console.error(err);
-            alert("Delete failed");
-        } finally {
-            setDeletingId(null);
-        }
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-50 py-10 px-4">
-            <div className="max-w-7xl mx-auto">
-
-                {/* Header */}
-                <h2 className="text-3xl font-black mb-6">Jobs</h2>
-
-                {/* Search */}
-                <input
-                    type="text"
-                    placeholder="Search jobs..."
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    className="mb-6 w-full px-4 py-3 border rounded-xl"
-                />
-
-                {/* Content */}
-                <div className="bg-white rounded-2xl shadow overflow-hidden">
-
-                    {loading ? (
-                        <Loader text="Loading jobs..." />
-                    ) : error ? (
-                        <div className="p-6 text-red-500">{error}</div>
-                    ) : jobs.length === 0 ? (
-                        <div className="p-10 text-center text-gray-500">
-                            No jobs found
-                        </div>
-                    ) : (
-                        <table className="min-w-full">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="p-4 text-left">Title</th>
-                                    <th className="p-4 text-left">Company</th>
-                                    <th className="p-4 text-left">Category</th>
-                                    <th className="p-4 text-left">Status</th>
-                                    <th className="p-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {jobs.map((job) => (
-                                    <tr key={job.id} className="border-t">
-
-                                        <td className="p-4 font-bold">
-                                            {job.title}
-                                        </td>
-
-                                        <td className="p-4">
-                                            {job.employer?.name || "Unknown"}
-                                        </td>
-
-                                        <td className="p-4">
-                                            {job.category?.name || "N/A"}
-                                        </td>
-
-                                        <td className="p-4">
-                                            {job.status ? "Active" : "Closed"}
-                                        </td>
-
-                                        <td className="p-4 text-right">
-                                            <button
-                                                onClick={() => handleDelete(job.id)}
-                                                disabled={deletingId === job.id}
-                                                className="text-red-600"
-                                            >
-                                                {deletingId === job.id ? "..." : "Delete"}
-                                            </button>
-                                        </td>
-
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-
-                    {/* Pagination */}
-                    {!loading && pagination.last_page > 1 && (
-                        <div className="p-4">
-                            <Pagination
-                                pagination={pagination}
-                                onPageChange={(p) => setPage(p)}
-                            />
-                        </div>
-                    )}
-                </div>
+          {/* Pagination */}
+          {!loading && pagination.last_page > 1 && (
+            <div className="p-4">
+              <Pagination pagination={pagination} onPageChange={(p) => setPage(p)} />
             </div>
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
 }

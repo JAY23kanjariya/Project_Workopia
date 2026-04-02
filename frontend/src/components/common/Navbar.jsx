@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
+import Badge from "../ui/Badge";
 
 function Navbar() {
     const { user, logout } = useAuth();
@@ -102,10 +103,10 @@ function Navbar() {
                                     </p>
                                     <span className="text-xs text-gray-500">
                                         {user.role_id === 1
-                                            ? "Admin"
+                                            ? <Badge label="Admin" variant="purple" />
                                             : user.role_id === 2
-                                                ? "Employer"
-                                                : "Candidate"}
+                                                ? <Badge label="Employer" variant="info" />
+                                                : <Badge label="Candidate" variant="success" />}
                                     </span>
                                 </div>
 

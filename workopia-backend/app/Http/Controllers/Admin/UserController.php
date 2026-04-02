@@ -11,9 +11,21 @@ class UserController extends Controller
     /**
      * Get all users with pagination and roles.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('role')->latest()->paginate(10);
+        // // Get all job posts with category and employer details
+        // $query = User::with('name');
+
+        // // Apply filters for Search by Name
+        // if ($request->has('name')) {
+        //     $query->where('name', 'like', '%' . $request->name . '%');
+        // }
+
+
+        // // return paginated results (10 per page)
+        // $users = $query->latest()->paginate(10);
+
+        $users = User::all();
 
         return response()->json([
             'success' => true,

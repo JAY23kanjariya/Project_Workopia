@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import * as jobApi from "../../api/jobApi";
 import Loader from "../../components/common/Loader";
 import Pagination from "../../components/common/Pagination";
-
-// Icons (same as yours)
+import DataTable from "../../components/ui/DataTable";
+import Badge from "../../components/ui/Badge";
 
 export default function AdminJobs() {
     const [jobs, setJobs] = useState([]);
@@ -86,6 +85,45 @@ export default function AdminJobs() {
         }
     };
 
+
+    // Table
+    const columns = [
+        {
+            header: "Title",
+            accessor: "title",
+            render: (job) => <span className="font-bold">{job.title}</span>,
+        },
+        {
+            header: "Company",
+            render: (job) => job.employer?.name || "Unknown",
+        },
+        {
+            header: "Category",
+            render: (job) => job.category?.name || "N/A",
+        },
+        {
+            header: "Status",
+            render: (job) => (
+                <Badge
+                    label={job.status ? "Active" : "Closed"}
+                    variant={job.status ? "success" : "danger"}
+                />
+            ),
+        },
+        {
+            header: "Actions",
+            align: "right",
+            render: (job) => (
+                <button
+                    onClick={() => handleDelete(job.id)}
+                    disabled={deletingId === job.id}
+                    className="text-red-600"
+                >
+                    {deletingId === job.id ? "..." : "Delete"}
+                </button>
+            ),
+        },
+    ];
     return (
         <div className="min-h-screen bg-gray-50 py-10 px-4">
             <div className="max-w-7xl mx-auto">
@@ -114,51 +152,12 @@ export default function AdminJobs() {
                             No jobs found
                         </div>
                     ) : (
-                        <table className="min-w-full">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="p-4 text-left">Title</th>
-                                    <th className="p-4 text-left">Company</th>
-                                    <th className="p-4 text-left">Category</th>
-                                    <th className="p-4 text-left">Status</th>
-                                    <th className="p-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {jobs.map((job) => (
-                                    <tr key={job.id} className="border-t">
-
-                                        <td className="p-4 font-bold">
-                                            {job.title}
-                                        </td>
-
-                                        <td className="p-4">
-                                            {job.employer?.name || "Unknown"}
-                                        </td>
-
-                                        <td className="p-4">
-                                            {job.category?.name || "N/A"}
-                                        </td>
-
-                                        <td className="p-4">
-                                            {job.status ? "Active" : "Closed"}
-                                        </td>
-
-                                        <td className="p-4 text-right">
-                                            <button
-                                                onClick={() => handleDelete(job.id)}
-                                                disabled={deletingId === job.id}
-                                                className="text-red-600"
-                                            >
-                                                {deletingId === job.id ? "..." : "Delete"}
-                                            </button>
-                                        </td>
-
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                        <DataTable
+                            columns={columns}
+                            data={jobs}
+                            loading={loading}
+                            emptyText="No jobs found"
+                        />
                     )}
 
                     {/* Pagination */}
