@@ -19,7 +19,7 @@ class AdminSeeder extends Seeder
 
         if ($adminRole) {
             User::create([
-                'name' => 'Admin User',
+                'name' => 'Workopia Admin',
                 'email' => 'admin@workopia.com',
                 'password' => Hash::make('password'), // or simply 'password' if the model hashes it automatically
                 'role_id' => $adminRole->id,
