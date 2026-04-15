@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Application;
 use App\Models\JobPost;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\JobAppliedEmail;
 
 class ApplicationController extends Controller
 {
@@ -33,6 +35,9 @@ class ApplicationController extends Controller
             'candidate_id' => $request->user()->id,
             'status' => 'Pending', // Pending, Approved, Rejected
         ]);
+
+        // Send Job Applied Email
+        Mail::to($request->user()->email)->send(new JobAppliedEmail($request->user(), $jobPost));
 
         // Return response
         return response()->json([
@@ -73,7 +78,7 @@ class ApplicationController extends Controller
          }
 
          // Get applications for the job post
-         $applications = Application::with('candidate')
+         $applications = Application::with(['candidate.candidateInformation'])
              ->where('job_post_id', $jobPostId)
              ->latest()
              ->get();

@@ -4,20 +4,26 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Employer\JobPostController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CandidateInformationController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
     // Common for all authenticated users
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']); 
-    // Categories :- Anyone logged in
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/change-password', [AuthController::class, 'changePassword']);
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/{id}', [CategoryController::class, 'show']);
     // Job Posts :- Anyone logged in
@@ -65,5 +71,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Dashboard route for Candidates
         Route::get('/candidate/dashboard', [DashboardController::class, 'candidateDashboard']);
+
+        // Candidate profile management
+        Route::get('/candidate/profile', [CandidateInformationController::class, 'showProfile']);
+        Route::post('/candidate/profile', [CandidateInformationController::class, 'store']);
     });
+
+    // Resource routes accessible by others (Admin/Employer)
+    Route::apiResource('candidate-information', CandidateInformationController::class)->except(['store']);
 });

@@ -54,4 +54,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+
+    public function candidateInformation()
+    {
+        return $this->hasOne(CandidateInformation::class);
+    }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AccountDeletedEmail;
 
 class UserController extends Controller
 {
@@ -25,7 +27,7 @@ class UserController extends Controller
         // // return paginated results (10 per page)
         // $users = $query->latest()->paginate(10);
 
-        $users = User::all();
+        $users = User::with('candidateInformation')->get();
 
         return response()->json([
             'success' => true,
@@ -54,6 +56,9 @@ class UserController extends Controller
                 'message' => 'You cannot delete your own account.'
             ], 403);
         }
+
+        // Send Account Deleted Email
+        Mail::to($user->email)->send(new AccountDeletedEmail($user));
 
         $user->delete();
 
