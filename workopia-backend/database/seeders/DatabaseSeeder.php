@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
     {
         // call role seeder
         $this->call(RoleSeeder::class);
+        $this->call(AdminSeeder::class);
     }
 }

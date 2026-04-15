@@ -116,10 +116,10 @@ export default function UsersPage() {
                     <td className="p-4 text-right">
                       <button
                         onClick={() => handleDelete(user.id)}
-                        disabled={deletingId === user.id}
-                        className="text-red-600"
+                        disabled={deletingId === user.id || user.role_id === 1}
+                        className="text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {deletingId === user.id ? "..." : "Delete"}
+                        {deletingId === user.id || user.role_id === 1 ? "" : "Delete"}
                       </button>
                     </td>
                   </tr>

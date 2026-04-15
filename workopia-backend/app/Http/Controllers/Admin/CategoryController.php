@@ -12,12 +12,21 @@ class CategoryController extends Controller
     // 🔹 Get All Categories (Anyone logged in)
     public function index(Request $request){
 
+        $query = Category::latest();
+
+        // Search logic
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $query->where('name', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('description', 'LIKE', "%{$searchTerm}%");
+        }
+
         // Fetch all categories without pagination if 'all=true'
         if ($request->has('all') && $request->all == 'true') {
-            $categories = Category::latest()->get();
+            $categories = $query->get();
         } else {
             // Fetch all categories with pagination (10 per page)
-            $categories = Category::latest()->paginate(10);
+            $categories = $query->paginate(10);
         }
 
         // Return response

@@ -5,8 +5,10 @@ import Pagination from "../../components/common/Pagination";
 import SearchInput from "../../components/ui/SearchInput";
 import DataTable from "../../components/ui/DataTable";
 import Badge from "../../components/ui/Badge";
+import { useNavigate } from "react-router-dom";
 
 export default function CategoriesPage() {
+    const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
     const [pagination, setPagination] = useState({});
     const [loading, setLoading] = useState(true);
@@ -15,10 +17,13 @@ export default function CategoriesPage() {
     const [deletingId, setDeletingId] = useState(null);
 
     // Fetch categories
-    const fetchCategories = async (pageNumber = 1) => {
+    const fetchCategories = async (pageNumber = 1, searchQuery = "") => {
         try {
             setLoading(true);
-            const res = await categoryApi.getCategories({ page: pageNumber });
+            const res = await categoryApi.getCategories({ 
+                page: pageNumber,
+                search: searchQuery 
+            });
             if (res.data.success) {
                 if (res.data.categories?.data) {
                     setCategories(res.data.categories.data);
@@ -39,7 +44,16 @@ export default function CategoriesPage() {
     };
 
     useEffect(() => {
-        fetchCategories(page);
+        const delayDebounceFn = setTimeout(() => {
+            setPage(1); // reset to page 1 on new search
+            fetchCategories(1, searchInput);
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchInput]);
+
+    useEffect(() => {
+        fetchCategories(page, searchInput);
     }, [page]);
 
     // Delete category
@@ -58,10 +72,7 @@ export default function CategoriesPage() {
         }
     };
 
-    // Filter categories locally
-    const filtered = categories.filter((c) =>
-        c.name?.toLowerCase().includes(searchInput.toLowerCase())
-    );
+
 
     // table
     const columns = [
@@ -69,6 +80,21 @@ export default function CategoriesPage() {
             header: "Name",
             accessor: "name",
             render: (category) => <span className="font-bold">{category.name}</span>,
+        },
+        {
+            header: "Description",
+            accessor: "description",
+            render: (category) => <span className="font-bold">{category.description}</span>,
+        },
+        {
+            header: "Status",
+            accessor: "status",
+            render: (category) => <span className="font-bold">{category.status === 1 ? "Active" : "Inactive"}</span>,
+        },
+        {
+            header: "Created At",
+            accessor: "created_at",
+            render: (category) => <span className="font-bold">{category.created_at.split('T')[0]}</span>,
         },
         {
             header: "Actions",
@@ -88,18 +114,23 @@ export default function CategoriesPage() {
     return (
         <div className="p-6">
             {/* Header */}
+
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-lg font-semibold">Categories</h1>
+                <button
+                    onClick={() => navigate("/admin/categories/create")}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                >
+                    Create Category
+                </button>
             </div>
 
 
             {/* Search */}
-            <input
-                type="text"
+            <SearchInput
                 placeholder="Search categories..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="mb-6 w-full px-4 py-3 border rounded-xl"
+                onChange={(val) => setSearchInput(val)}
             />
 
             {/* Table */}
