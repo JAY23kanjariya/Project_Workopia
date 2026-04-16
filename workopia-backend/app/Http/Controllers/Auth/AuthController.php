@@ -16,7 +16,8 @@ use App\Mail\WelcomeEmail;
 class AuthController extends Controller
 {
     //REGISTER
-    public function register(Request $request){
+    public function register(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -55,7 +56,8 @@ class AuthController extends Controller
     }
 
     //LOGIN
-    public function login(Request $request){
+    public function login(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:8',
@@ -87,21 +89,47 @@ class AuthController extends Controller
                 'user' => $user,
                 'token' => $token
             ]
-        ], 200);
+        ], 200)->cookie(
+                'token',
+                $token,
+                60 * 24, // 1 day
+                '/',
+                null,     
+                false,    // secure (false for localhost)
+                false,    // httpOnly: set to false so frontend can read it
+                false,
+                'Lax'     
+            )->cookie(
+                'user',
+                json_encode($user),
+                60 * 24,
+                '/',
+                null,
+                false,
+                false,    // httpOnly: set to false
+                false,
+                'Lax'
+            );
     }
 
     //LOGOUT
-    public function logout(Request $request){
-        $request->user()->currentAccessToken()->delete();
+    public function logout(Request $request)
+    {
+        if ($request->user()) {
+            $request->user()->currentAccessToken()->delete();
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'User logged out successfully.',
-        ], 200);
+        ], 200)
+        ->withoutCookie('token')
+        ->withoutCookie('user');
     }
 
     // ME
-    public function me(Request $request){
+    public function me(Request $request)
+    {
         $user = $request->user();
         return response()->json([
             'success' => true,
@@ -174,5 +202,34 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Password changed successfully.',
         ], 200);
+    }
+
+    /**
+     * Delete user account (non-admin only).
+     */
+    public function deleteAccount(Request $request)
+    {
+        $user = $request->user();
+
+        // Prevent admin from deleting their account
+        if ($user->role_id === 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Admin accounts cannot be deleted.',
+            ], 403);
+        }
+
+        // Revoke all tokens
+        $user->tokens()->delete();
+
+        // Delete the user
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Account deleted successfully.',
+        ], 200)
+        ->withoutCookie('token')
+        ->withoutCookie('user');
     }
 }

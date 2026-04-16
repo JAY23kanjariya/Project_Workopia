@@ -15,19 +15,19 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        // // Get all job posts with category and employer details
-        // $query = User::with('name');
+        $query = User::query();
 
-        // // Apply filters for Search by Name
-        // if ($request->has('name')) {
-        //     $query->where('name', 'like', '%' . $request->name . '%');
-        // }
+        // Apply filters for Search by Name or Email
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
 
-
-        // // return paginated results (10 per page)
-        // $users = $query->latest()->paginate(10);
-
-        $users = User::with('candidateInformation')->get();
+        // Return paginated results (10 per page)
+        $users = $query->latest()->paginate(10);
 
         return response()->json([
             'success' => true,

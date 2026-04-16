@@ -46,7 +46,7 @@ function LoginPage() {
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
 
                     <h1 className="text-xl font-semibold text-gray-900 mb-4">
-                        Login
+                        Login 
                     </h1>
 
                     {serverError && (
