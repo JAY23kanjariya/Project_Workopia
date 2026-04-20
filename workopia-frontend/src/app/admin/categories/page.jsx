@@ -7,7 +7,7 @@ import Pagination from "@/components/ui/Pagination";
 import Badge from "@/components/ui/Badge";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { FiPlus, FiSearch, FiTrash2, FiEdit3, FiLayers, FiInfo, FiTag } from "react-icons/fi";
+import { FiPlus, FiSearch, FiTrash2, FiEdit3, FiLayers, FiInfo, FiTag, FiEye } from "react-icons/fi";
 
 export default function CategoriesPage() {
     const router = useRouter();
@@ -130,7 +130,7 @@ export default function CategoriesPage() {
                                     <th className="px-8 py-5">Category Detail</th>
                                     <th className="px-8 py-5">Status</th>
                                     <th className="px-8 py-5">Created On</th>
-                                    <th className="px-8 py-5 text-right">Settings</th>
+                                    <th className="px-8 py-5">Settings</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -156,11 +156,18 @@ export default function CategoriesPage() {
                                             <FiInfo className="w-3.5 h-3.5" />
                                             {new Date(category.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </td>
-                                        <td className="px-8 py-6 text-right">
-                                            <div className="flex items-center justify-end gap-2 translate-x-2 opacity-100 sm:opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center gap-2 transition-all">
+                                                <button
+                                                    onClick={() => router.push(`/admin/categories/edit/${category.id}/view`)}
+                                                    className="p-2 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-100 rounded-xl transition-all"
+                                                    title="View Metadata"
+                                                >
+                                                    <FiEye className="w-5 h-5" />
+                                                </button>
                                                 <button
                                                     onClick={() => router.push(`/admin/categories/edit/${category.id}`)}
-                                                    className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                                                    className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded-xl transition-all"
                                                     title="Edit Category"
                                                 >
                                                     <FiEdit3 className="w-5 h-5" />
@@ -168,7 +175,7 @@ export default function CategoriesPage() {
                                                 <button
                                                     onClick={() => handleDelete(category.id, category.name)}
                                                     disabled={deletingId === category.id}
-                                                    className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all disabled:opacity-20"
+                                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-xl transition-all disabled:opacity-20"
                                                     title="Delete Category"
                                                 >
                                                     <FiTrash2 className="w-5 h-5" />

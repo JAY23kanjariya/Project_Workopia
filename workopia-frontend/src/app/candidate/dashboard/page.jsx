@@ -62,7 +62,7 @@ export default function CandidateDashboard() {
                         <FiSearch className="w-4 h-4" /> Browse Jobs
                     </Link>
                     {[
-                        { label: "My Applications", link: "/candidate/my-applications" },
+                        { label: "My Applications", link: "/candidate/applications" },
                         { label: "Settings", link: "/candidate/settings" },
                     ].map((a, i) => (
                         <Link key={i} href={a.link} className="group px-5 py-2.5 bg-white border border-gray-200 rounded-2xl text-sm font-bold text-gray-700 hover:border-blue-500 hover:text-blue-600 hover:shadow-lg hover:shadow-blue-500/10 transition-all flex items-center gap-2">
@@ -109,7 +109,7 @@ export default function CandidateDashboard() {
             <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden pb-4">
                 <div className="flex items-center justify-between px-8 py-6 border-b border-gray-50">
                     <h3 className="font-bold text-gray-900 text-lg tracking-tight">Recent Applications</h3>
-                    <Link href="/candidate/my-applications" className="text-sm font-bold text-indigo-600 hover:underline flex items-center gap-1">
+                    <Link href="/candidate/applications" className="text-sm font-bold text-indigo-600 hover:underline flex items-center gap-1">
                         View All <FiArrowUpRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>

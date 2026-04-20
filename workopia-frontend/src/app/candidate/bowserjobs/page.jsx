@@ -9,7 +9,7 @@ import Loader from "@/components/ui/Loader";
 import Badge from "@/components/ui/Badge";
 import Pagination from "@/components/ui/Pagination";
 import { toast } from "react-hot-toast";
-import { FiSearch, FiFilter, FiBriefcase, FiMapPin, FiClock, FiUser, FiArrowLeft, FiSend, FiLayers, FiX, FiInbox } from "react-icons/fi";
+import { FiSearch, FiFilter, FiBriefcase, FiMapPin, FiClock, FiUser, FiArrowLeft, FiSend, FiLayers, FiX, FiInbox, FiCheckCircle } from "react-icons/fi";
 
 export default function BrowseJobs() {
     const [jobs, setJobs] = useState([]);
@@ -83,6 +83,9 @@ export default function BrowseJobs() {
             setApplyingId(jobId);
             await applyForJob(jobId);
             toast.success(`Applied to "${title}" successfully!`, { id: t });
+            
+            // ✅ Update local state to show "Applied" immediately
+            setJobs(prev => prev.map(j => j.id === jobId ? { ...j, has_applied: true } : j));
         } catch (err) {
             const msg = err.response?.data?.message || "Application failed";
             toast.error(msg, { id: t });
@@ -177,17 +180,21 @@ export default function BrowseJobs() {
 
                             {/* Actions */}
                             <div className="flex gap-2">
-                                <Link href={`/jobs/${job.id}`} className="flex-1 text-center py-3 bg-slate-50 text-slate-600 rounded-2xl text-xs font-extrabold hover:bg-slate-100 transition-all active:scale-95">
+                                <Link href={`/candidate/bowserjobs/${job.id}`} className="flex-1 text-center py-3 bg-slate-50 text-slate-600 rounded-2xl text-xs font-extrabold hover:bg-slate-100 transition-all active:scale-95">
                                     View Details
                                 </Link>
                                 {job.status ? (
                                     <button
                                         onClick={() => handleApply(job.id, job.title)}
-                                        disabled={applyingId === job.id}
-                                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-2xl text-xs font-extrabold hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200 transition-all active:scale-95 disabled:opacity-50"
+                                        disabled={applyingId === job.id || job.has_applied}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-extrabold transition-all active:scale-95 disabled:opacity-50 ${
+                                            job.has_applied 
+                                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100 cursor-default" 
+                                            : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200"
+                                        }`}
                                     >
-                                        <FiSend className="w-3.5 h-3.5" />
-                                        {applyingId === job.id ? "Applying..." : "Quick Apply"}
+                                        {job.has_applied ? <FiCheckCircle className="w-3.5 h-3.5" /> : <FiSend className="w-3.5 h-3.5" />}
+                                        {applyingId === job.id ? "Applying..." : job.has_applied ? "Applied" : "Quick Apply"}
                                     </button>
                                 ) : null}
                             </div>

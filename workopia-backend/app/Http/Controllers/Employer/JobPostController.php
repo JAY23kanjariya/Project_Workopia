@@ -3,166 +3,128 @@
 namespace App\Http\Controllers\Employer;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\Employer\StoreJobPostRequest;
+use App\Http\Requests\Employer\UpdateJobPostRequest;
+use App\Http\Resources\JobPostResource;
 use App\Models\JobPost;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class JobPostController extends Controller
 {
-    // 🔹 View Jobs (All logged in users)
-    public function index(Request $request)
+
+    /**
+     * Display only the job posts created by the currently authenticated employee.
+     */
+    public function EmployeePostedJobs(Request $request): JsonResponse
     {
+        $query = $request->user()->jobPosts()->with(['category', 'employer']);
 
-        // Get all job posts with category and employer details
-        $query = JobPost::with('category', 'employer');
-
-        // Apply filters for Search by Title
-        if ($request->has('title')) {
-            $query->where('title', 'like', '%' . $request->title . '%');
+        // Filter by 'search' or 'title' parameter
+        $search = $request->get('search') ?? $request->get('title');
+        if ($search) {
+            $query->where('title', 'like', '%' . $search . '%');
         }
 
-        // Apply filters for Filter by Category
-        if ($request->has('category_id')) {
+        $paginator = $query->latest()->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'jobPosts' => [
+                'data' => JobPostResource::collection($paginator->items()),
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'total' => $paginator->total(),
+            ]
+        ]);
+    }
+
+    /**
+     * Display a listing of all active job posts (Public/Candidate view).
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $query = JobPost::with(['category', 'employer'])->where('status', 1);
+
+        // Filter by 'search' or 'title' parameter
+        $search = $request->get('search') ?? $request->get('title');
+        if ($search) {
+            $query->where('title', 'like', '%' . $search . '%');
+        }
+
+        // Apply additional filters
+        if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
-        // Apply filters for Filter by Employer
-        if ($request->has('employer_id')) {
-            $query->where('employer_id', $request->employer_id);
-        }
+        $paginator = $query->latest()->paginate(10);
 
-        // return paginated results (10 per page)
-        $jobPosts = $query->latest()->paginate(10);
-
-        // Return response
         return response()->json([
             'success' => true,
-            'jobPosts' => $jobPosts
-        ], 200);
+            'jobPosts' => [
+                'data' => JobPostResource::collection($paginator->items()),
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'total' => $paginator->total(),
+            ]
+        ]);
     }
 
-    // 🔹 Create Job Post (Employer only)
-    public function store(Request $request)
+    /**
+     * Store a newly created job post.
+     */
+    public function store(StoreJobPostRequest $request): JsonResponse
     {
-        // Validate request data
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'location' => 'required|string|max:255',
-            'description' => 'required|string',
-            'status' => 'required|boolean',
-        ]);
+        $jobPost = $request->user()->jobPosts()->create($request->validated());
 
-        // send validation errors
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // Create new job post
-        $jobPost = JobPost::create([
-            'title' => $request->title,
-            'category_id' => $request->category_id, 
-            'employer_id' => $request->user()->id, // Automatically set employer_id
-            'location' => $request->location,
-            'description' => $request->description,
-            'status' => $request->status,
-        ]);
-
-        // Return response
         return response()->json([
             'success' => true,
             'message' => 'Job post created successfully.',
-            'jobPost' => $jobPost
-        ], 200);
+            'data' => new JobPostResource($jobPost->load(['category', 'employer']))
+        ], 201);
     }
 
-    // 🔹 Get Single Job Post (All logged in users)
-    public function show($id)
+    public function show($id): JsonResponse
     {
-        // Find job post by ID
-        $jobPost = JobPost::with('category', 'employer')->find($id);
+        $jobPost = JobPost::with(['category', 'employer'])
+            ->withCount('applications')
+            ->findOrFail($id);
 
-        // If job post not found, return error
-        if (!$jobPost) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Job post not found.'  
-            ], 404);
-        }
-
-        // Return response
         return response()->json([
             'success' => true,
-            'jobPost' => $jobPost
-        ], 200);
+            'jobPost' => new JobPostResource($jobPost)
+        ]);
     }
 
-    // 🔹 Update Job Post (Employer only)
-    public function update(Request $request, $id)
+    /**
+     * Update the specified job post.
+     */
+    public function update(UpdateJobPostRequest $request, $id): JsonResponse
     {
-        // Find job post by ID
-        $jobPost = JobPost::find($id);
+        $jobPost = $request->user()->jobPosts()->findOrFail($id);
+        
+        $jobPost->update($request->validated());
 
-        // If job post not found, return error
-        if (!$jobPost) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Job post not found.'  
-            ], 404);
-        }
-
-        // Validate request data
-        $validator = Validator::make($request->all(), [
-            'title' => 'sometimes|required|string|max:255',
-            'category_id' => 'sometimes|required|exists:categories,id',
-            'location' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|required|string',
-            'status' => 'sometimes|required|boolean',
-        ]);
-
-        // send validation errors
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // Update job post fields if provided
-        $jobPost->update($request->only(['title', 'category_id', 'location', 'description', 'status']));
-
-        // Return response
         return response()->json([
             'success' => true,
             'message' => 'Job post updated successfully.',
-            'jobPost' => $jobPost
-        ], 200);
+            'jobPost' => new JobPostResource($jobPost->load(['category', 'employer']))
+        ]);
     }
 
-    // 🔹 Delete Job Post (Employer only)
-    public function destroy($id)
+    /**
+     * Remove the specified job post.
+     */
+    public function destroy(Request $request, $id): JsonResponse
     {
-        // Find job post by ID
-        $jobPost = JobPost::find($id);
-
-        // If job post not found, return error
-        if (!$jobPost) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Job post not found.'  
-            ], 404);
-        }
-
-        // Delete job post
+        $jobPost = $request->user()->jobPosts()->findOrFail($id);
+        
         $jobPost->delete();
 
-        // Return response
         return response()->json([
             'success' => true,
             'message' => 'Job post deleted successfully.'
-        ], 200);
+        ]);
     }
 }

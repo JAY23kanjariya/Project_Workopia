@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getJobApplications, updateApplicationStatus } from "@/service/applicationService";
-import { getJobById } from "@/service/jobService";
+import { getJobById, getEmployerJobPosts } from "@/service/jobService";
 import Loader from "@/components/ui/Loader";
 import Badge from "@/components/ui/Badge";
 import { toast } from "react-hot-toast";
-import { FiArrowLeft, FiUser, FiMail, FiCalendar, FiCheckCircle, FiXCircle, FiClock, FiFileText, FiInbox } from "react-icons/fi";
+import { FiArrowLeft, FiUser, FiMail, FiCalendar, FiCheckCircle, FiXCircle, FiClock, FiFileText, FiInbox, FiTrendingUp, FiArrowRight, FiBriefcase } from "react-icons/fi";
 
 function ApplicationsContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const jobId = searchParams.get("job_id");
 
+    const [jobs, setJobs] = useState([]);
     const [applications, setApplications] = useState([]);
     const [jobTitle, setJobTitle] = useState("");
     const [loading, setLoading] = useState(true);
@@ -21,28 +23,35 @@ function ApplicationsContent() {
     const [updatingId, setUpdatingId] = useState(null);
 
     const fetchData = async () => {
-        if (!jobId) {
-            setError("No job selected. Please select a job from your listings.");
-            setLoading(false);
-            return;
-        }
-
         try {
             setLoading(true);
             setError("");
 
-            const [jobRes, appRes] = await Promise.all([
-                getJobById(jobId),
-                getJobApplications(jobId),
-            ]);
+            if (jobId) {
+                // Detailed View: Show applicants for a specific job
+                const [jobRes, appRes] = await Promise.all([
+                    getJobById(jobId),
+                    getJobApplications(jobId),
+                ]);
 
-            setJobTitle(jobRes?.data?.jobPost?.title || "Job");
-            setApplications(
-                Array.isArray(appRes?.data?.applications) ? appRes.data.applications : []
-            );
+                if (jobRes?.data?.success) {
+                    setJobTitle(jobRes.data.jobPost?.title || "Job");
+                    setApplications(Array.isArray(appRes?.data?.applications) ? appRes.data.applications : []);
+                } else {
+                    setError("Job not found or access denied.");
+                }
+            } else {
+                // Master View: Show list of all jobs created by employer
+                const res = await getEmployerJobPosts();
+                if (res?.data?.success) {
+                    setJobs(res.data.jobPosts?.data || []);
+                } else {
+                    setError("Failed to load your job listings.");
+                }
+            }
         } catch (err) {
             console.error("Fetch Error:", err);
-            setError("Could not load applications. Please try again.");
+            setError("Something went wrong while fetching data.");
         } finally {
             setLoading(false);
         }
@@ -79,20 +88,82 @@ function ApplicationsContent() {
         }
     };
 
+    if (loading) return <Loader text={jobId ? "Scanning candidate profiles..." : "Gathering your job data..."} />;
+
+    // ─── MASTER VIEW: LIST OF JOBS ──────────────────────────────────────────
+    if (!jobId) {
+        return (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Application Tracker</h1>
+                        <p className="text-gray-500 mt-1 font-medium italic select-none">
+                            You have created <span className="text-indigo-600 font-bold">{jobs.length} job{jobs.length !== 1 ? "s" : ""}</span>. Select one to view candidate details.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {jobs.length === 0 ? (
+                         <div className="col-span-full bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-20 flex flex-col items-center text-center">
+                            <FiBriefcase className="w-12 h-12 text-slate-200 mb-4" />
+                            <h3 className="font-bold text-gray-400 italic font-medium">No job postings found.</h3>
+                            <Link href="/employer/jobs/create" className="mt-4 text-sm font-extrabold text-blue-600 hover:underline underline-offset-4">Post a Job First →</Link>
+                         </div>
+                    ) : (
+                        jobs.map((job) => (
+                            <div key={job.id} className="group bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 hover:shadow-xl hover:shadow-indigo-50 hover:border-indigo-100 transition-all flex flex-col h-full">
+                                <div className="flex items-center gap-4 mb-5">
+                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                                        <FiTrendingUp className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="text-sm font-black text-gray-900 truncate uppercase tracking-tight">{job.title}</h3>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{job.category?.name || "Uncategorized"}</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex-1 py-4 border-y border-gray-50 mb-6 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-tighter mb-1 select-none">Total Applicants</p>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-2xl font-black text-indigo-600 leading-none">{job.applications_count || 0}</span>
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Candidates</span>
+                                        </div>
+                                    </div>
+                                    <Badge variant={job.status ? "success" : "disabled"}>{job.status ? "Active" : "Closed"}</Badge>
+                                </div>
+
+                                <button
+                                    onClick={() => router.push(`/employer/applications?job_id=${job.id}`)}
+                                    className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-2 group/btn active:scale-95"
+                                >
+                                    View Applicants
+                                    <FiArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // ─── DETAIL VIEW: LIST OF APPLICANTS ─────────────────────────────────────
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <Link
-                        href="/employer/jobs"
+                    <button
+                        onClick={() => router.push("/employer/applications")}
                         className="group flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-indigo-600 transition-colors mb-4 inline-flex"
                     >
                         <FiArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                        Back to Jobs
-                    </Link>
+                        Back to Job Selection
+                    </button>
                     <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                        {loading ? "Loading..." : `${jobTitle}`}
+                        {jobTitle}
                     </h1>
                     <p className="text-gray-500 mt-1 font-medium italic">
                         {applications.length} candidate{applications.length !== 1 ? "s" : ""} have applied for this position.
@@ -111,11 +182,9 @@ function ApplicationsContent() {
                 </div>
             </div>
 
-            {/* Content */}
+            {/* Table Content */}
             <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden min-h-[400px] flex flex-col">
-                {loading ? (
-                    <Loader text="Retrieving applicant profiles..." />
-                ) : error ? (
+                {error ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-20 text-center">
                         <div className="p-4 bg-red-50 text-red-500 rounded-full mb-4">
                             <FiFileText className="w-8 h-8" />

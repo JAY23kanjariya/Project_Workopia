@@ -12,7 +12,8 @@ import {
     FiSearch, 
     FiLayout,
     FiSettings,
-    FiChevronRight
+    FiChevronRight,
+    FiUser
 } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 
@@ -38,6 +39,7 @@ export default function Sidebar({ role }) {
             { name: "Dashboard", path: "/candidate/dashboard", icon: FiGrid },
             { name: "Browse Jobs", path: "/candidate/bowserjobs", icon: FiSearch },
             { name: "My Applications", path: "/candidate/applications", icon: FiFileText },
+            { name: "Profile", path: "/candidate/profile", icon: FiUser },
             { name: "Settings", path: "/candidate/settings", icon: FiSettings },
         ],
     };
@@ -108,7 +110,7 @@ export default function Sidebar({ role }) {
                     className="flex items-center gap-3 w-full px-4 py-3 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl text-sm font-semibold transition-all duration-200 group"
                 >
                     <FiLogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                    <span>Sign Out</span>
+                    <span>Logout</span>
                 </button>
             </div>
         </aside>

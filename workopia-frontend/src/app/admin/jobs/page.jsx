@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { getJobs, adminDeleteJob } from "@/service/jobService";
 import Loader from "@/components/ui/Loader";
 import Pagination from "@/components/ui/Pagination";
@@ -18,16 +18,7 @@ export default function AdminJobs() {
     const [search, setSearch] = useState("");
     const [deletingId, setDeletingId] = useState(null);
 
-    // 🔍 Debounce search
-    useEffect(() => {
-        const delay = setTimeout(() => setSearch(searchInput), 600);
-        return () => clearTimeout(delay);
-    }, [searchInput]);
-
-    // Reset page on search
-    useEffect(() => setPage(1), [search]);
-
-    // 📡 Fetch jobs
+     // 📡 Fetch jobs
     const fetchAllJobs = async (pageNumber = 1) => {
         try {
             setLoading(true);
@@ -55,9 +46,22 @@ export default function AdminJobs() {
         }
     };
 
+    // 🔍 Debounce search
+    useEffect(() => {
+        const delay = setTimeout(() => setSearch(searchInput), 600);
+        return () => clearTimeout(delay);
+    }, [searchInput]);
+
+    // Reset page on search
+    useEffect(() => setPage(1), [search]);
+
     useEffect(() => {
         fetchAllJobs(page);
     }, [page, search]);
+
+   
+
+    
 
     // ❌ Delete job
     const handleDelete = async (id, title) => {
@@ -121,12 +125,12 @@ export default function AdminJobs() {
                     <div className="overflow-x-auto flex-1">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="border-b border-gray-50 uppercase tracking-widest text-[10px] font-black text-gray-400">
+                                <tr className=" ">
                                     <th className="px-8 py-5">Position</th>
                                     <th className="px-8 py-5">Employer</th>
-                                    <th className="px-8 py-5">Details</th>
+                                    <th className="px-8 py-5">Category</th>
                                     <th className="px-8 py-5">Status</th>
-                                    <th className="px-8 py-5 text-right">Actions</th>
+                                    <th className="px-8 py-5">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -166,12 +170,7 @@ export default function AdminJobs() {
                                         <td className="px-8 py-6">
                                             <div className="flex flex-col gap-1">
                                                 <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1">
-                                                    <FiDollarSign className="w-3 h-3" />
-                                                    {job.salary || "Not disclosed"}
-                                                </span>
-                                                <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1">
-                                                    <FiClock className="w-3 h-3" />
-                                                    {job.job_type || "Full-time"}
+                                                    {job.category?.name || "Not disclosed"}
                                                 </span>
                                             </div>
                                         </td>
@@ -184,12 +183,12 @@ export default function AdminJobs() {
                                         </td>
 
                                         {/* Actions */}
-                                        <td className="px-8 py-6 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all">
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center gap-2 transition-all">
                                                 <button
                                                     onClick={() => handleDelete(job.id, job.title)}
                                                     disabled={deletingId === job.id}
-                                                    className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all disabled:opacity-20"
+                                                    className="p-2 text-red-500 hover:text-red-600 hover:bg-red-100 rounded-xl transition-all disabled:opacity-20"
                                                     title="Delete Job"
                                                 >
                                                     <FiTrash2 className="w-5 h-5" />

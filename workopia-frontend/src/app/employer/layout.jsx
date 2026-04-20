@@ -31,7 +31,7 @@ export default async function EmployerLayout({ children }) {
                 <Sidebar role={ROLE_NAMES[user.role_id]} />
                 
                 {/* Main Content Area */}
-                <main className="flex-1 flex flex-col min-h-[calc(100vh-64px)]">
+                <main className="flex-1 flex flex-col min-h-[calc(100vh-64px)] bg-blue-50">
                     <div className="flex-1 p-4 sm:p-8 lg:p-10 animate-in fade-in duration-500">
                         <div className="max-w-7xl mx-auto">
                             {children}

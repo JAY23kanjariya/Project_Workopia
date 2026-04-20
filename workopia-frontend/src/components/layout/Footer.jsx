@@ -59,7 +59,7 @@ export default function Footer() {
                         <ul className="space-y-4">
                             <li className="flex items-start gap-3 text-sm text-gray-500">
                                 <FiMapPin className="text-blue-600 mt-0.5 shrink-0" />
-                                <span>123 Talent Street, <br />Innovation Hub, CA 94043</span>
+                                <span>Workopia Demo <br />Gec,bhavnagar</span>
                             </li>
                             <li className="flex items-center gap-3 text-sm text-gray-500">
                                 <FiMail className="text-blue-600 shrink-0" />

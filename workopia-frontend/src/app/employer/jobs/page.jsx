@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getJobs, deleteJob } from "@/service/jobService";
+import { getEmployerJobPosts, deleteJob } from "@/service/jobService";
 import Loader from "@/components/ui/Loader";
 import Pagination from "@/components/ui/Pagination";
 import Badge from "@/components/ui/Badge";
 import { toast } from "react-hot-toast";
-import { FiPlus, FiSearch, FiTrash2, FiEdit3, FiBriefcase, FiMapPin, FiUsers, FiDollarSign, FiClock, FiX, FiAlertTriangle } from "react-icons/fi";
+import { FiPlus, FiSearch, FiTrash2, FiEdit3, FiBriefcase, FiMapPin, FiUsers, FiDollarSign, FiClock, FiX, FiAlertTriangle, FiEye } from "react-icons/fi";
 
 export default function EmployerJobs() {
     const [jobs, setJobs] = useState([]);
@@ -32,7 +32,7 @@ export default function EmployerJobs() {
     const fetchJobs = async (pageNumber = 1) => {
         try {
             setLoading(true);
-            const res = await getJobs({ page: pageNumber, title: search });
+            const res = await getEmployerJobPosts({ page: pageNumber, search: search });
 
             if (res.data.success) {
                 const data = res.data.jobPosts;
@@ -124,7 +124,7 @@ export default function EmployerJobs() {
                                     <th className="px-8 py-5">Position</th>
                                     <th className="px-8 py-5">Details</th>
                                     <th className="px-8 py-5">Status</th>
-                                    <th className="px-8 py-5 text-right">Actions</th>
+                                    <th className="px-8 py-5">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -149,13 +149,10 @@ export default function EmployerJobs() {
                                         <td className="px-8 py-6">
                                             <div className="flex flex-col gap-1">
                                                 <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1">
-                                                    <FiDollarSign className="w-3 h-3" />
-                                                    {job.salary || "Not disclosed"}
+                                                    {/* <FiDollarSign className="w-3 h-3" /> */}
+                                                    {job.category?.name || "Not disclosed"}
                                                 </span>
-                                                <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1">
-                                                    <FiClock className="w-3 h-3" />
-                                                    {job.job_type || "Full-time"}
-                                                </span>
+
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
@@ -163,8 +160,8 @@ export default function EmployerJobs() {
                                                 {job.status ? "Active" : "Closed"}
                                             </Badge>
                                         </td>
-                                        <td className="px-8 py-6 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all">
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center gap-2 transition-all">
                                                 <Link
                                                     href={`/employer/applications?job_id=${job.id}`}
                                                     className="px-3 py-2 text-[11px] font-extrabold rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-all flex items-center gap-1"
@@ -173,15 +170,22 @@ export default function EmployerJobs() {
                                                     Applicants
                                                 </Link>
                                                 <Link
+                                                    href={`/employer/jobs/${job.id}/view`}
+                                                    className="p-2 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-100 rounded-xl transition-all"
+                                                    title="View Details"
+                                                >
+                                                    <FiEye className="w-5 h-5" />
+                                                </Link>
+                                                <Link
                                                     href={`/employer/jobs/${job.id}`}
-                                                    className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                                                    className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded-xl transition-all"
                                                     title="Edit Job"
                                                 >
                                                     <FiEdit3 className="w-5 h-5" />
                                                 </Link>
                                                 <button
                                                     onClick={() => { setDeleteId(job.id); setDeleteTitle(job.title); }}
-                                                    className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-xl transition-all"
                                                     title="Delete Job"
                                                 >
                                                     <FiTrash2 className="w-5 h-5" />

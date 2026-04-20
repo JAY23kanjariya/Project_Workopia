@@ -48,7 +48,7 @@ class CandidateInformationController extends Controller
             return response()->json(['message' => 'Candidate profile not found.'], 404);
         }
 
-        return new CandidateInformationResource($info);
+        return new CandidateInformationResource($info->load('user'));
     }
 
     /**

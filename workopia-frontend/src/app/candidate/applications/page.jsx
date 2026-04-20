@@ -52,7 +52,7 @@ export default function AppliedJobs() {
                     <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">My Applications</h1>
                     <p className="text-gray-500 mt-1 font-medium italic">Track every opportunity you've pursued.</p>
                 </div>
-                <Link href="/jobs" className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-2xl text-sm font-bold hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200 transition-all active:scale-95">
+                <Link href="/candidate/bowserjobs" className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-2xl text-sm font-bold hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200 transition-all active:scale-95">
                     <FiBriefcase className="w-4 h-4" /> Browse More Jobs
                 </Link>
             </div>
@@ -89,7 +89,7 @@ export default function AppliedJobs() {
                         <div className="p-4 bg-slate-50 text-slate-300 rounded-full mb-4"><FiInbox className="w-10 h-10" /></div>
                         <h3 className="text-lg font-bold text-gray-500">No Applications Yet</h3>
                         <p className="text-sm text-gray-400 mt-1 italic max-w-xs">Your journey starts with a single application. Explore open positions now.</p>
-                        <Link href="/jobs" className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-2xl text-sm font-bold hover:bg-blue-700 transition-all">Browse Jobs</Link>
+                        <Link href="/candidate/bowserjobs" className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-2xl text-sm font-bold hover:bg-blue-700 transition-all">Browse Jobs</Link>
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-50">
@@ -115,7 +115,7 @@ export default function AppliedJobs() {
                                     {/* Right: Status + Action */}
                                     <div className="flex items-center gap-3 sm:ml-auto">
                                         <Badge variant={sc.variant}><Icon className="w-3 h-3 mr-1" />{app.status || "Pending"}</Badge>
-                                        <Link href={`/jobs/${app.job_post_id}`} className="px-4 py-2 text-[11px] font-extrabold rounded-xl bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700 transition-all flex items-center gap-1">
+                                        <Link href={`/candidate/bowserjobs/${app.job_post_id}`} className="px-4 py-2 text-[11px] font-extrabold rounded-xl bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-700 transition-all flex items-center gap-1">
                                             View <FiArrowUpRight className="w-3 h-3" />
                                         </Link>
                                     </div>

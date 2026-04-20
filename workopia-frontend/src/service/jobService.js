@@ -1,9 +1,16 @@
 import api from "@/lib/axiosClient";
 
 // GET all jobs (search + pagination)
-export const getJobs = (search) => {
+export const getJobs = (params) => {
     return api.get('/job-posts', {
-        params: { search }
+        params
+    });
+};
+
+// GET employer's job posts
+export const getEmployerJobPosts = (params) => {
+    return api.get('/employer/job-posts', {
+        params
     });
 };
 
@@ -30,4 +37,9 @@ export const deleteJob = (id) => {
 // Admin delete job
 export const adminDeleteJob = (id) => {
     return api.delete(`/admin/job-posts/${id}`);
+};
+
+// Candidate: Apply for a job
+export const applyToJob = (jobId) => {
+    return api.post(`/job-posts/${jobId}/apply`);
 };

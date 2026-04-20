@@ -167,15 +167,15 @@ export default function UsersPage() {
                                                     className={`p-2 rounded-xl transition-all duration-200 ${
                                                         user.role_id === 1 
                                                         ? "text-gray-200 cursor-not-allowed" 
-                                                        : "text-slate-300 hover:text-red-600 hover:bg-red-50 hover:shadow-lg hover:shadow-red-200"
+                                                        : "text-red-500 hover:text-red-600 hover:bg-red-100 hover:shadow-lg hover:shadow-red-100"
                                                     }`}
                                                     title={user.role_id === 1 ? "Cannot delete admin account" : "Delete User"}
                                                 >
                                                     <FiTrash2 className="w-5 h-5" />
                                                 </button>
-                                                <button className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
+                                                {/* <button className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
                                                     <FiMoreVertical className="w-5 h-5" />
-                                                </button>
+                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

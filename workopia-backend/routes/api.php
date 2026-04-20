@@ -52,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Employer middleware
     Route::middleware('isEmployer')->group(function () {
         // Job post management routes for Employers
+        Route::get('/employer/job-posts', [JobPostController::class, 'EmployeePostedJobs']);
         Route::post('/job-posts', [JobPostController::class, 'store']);
         Route::put('/job-posts/{id}', [JobPostController::class, 'update']);
         Route::delete('/job-posts/{id}', [JobPostController::class, 'destroy']);
