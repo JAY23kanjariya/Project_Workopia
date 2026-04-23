@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useFormik } from "formik";
 import { toast } from "react-hot-toast";
-import { FiMail, FiLock, FiBriefcase, FiArrowRight, FiAlertCircle } from "react-icons/fi";
+import { FiMail, FiLock, FiBriefcase, FiArrowRight, FiAlertCircle, FiArrowLeft } from "react-icons/fi";
 import { signIn } from "@/service/authService";
 import { signInValidationSchema } from "./signInValidationSchema";
 import { useState } from "react";
@@ -97,9 +97,13 @@ export default function SignInPage() {
                         </Link>
                     </div>
 
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-2">Welcome back</h1>
-                        <p className="text-gray-400 font-medium">Sign in to your account to continue.</p>
+                    <div className="mb-10">
+                        <Link href="/" className="group inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-all mb-6">
+                            <FiArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                            Back to Home
+                        </Link>
+                        <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">Welcome back</h1>
+                        <p className="text-gray-400 font-medium tracking-tight">Sign in to your account to continue.</p>
                     </div>
 
                     {/* Server Error */}

@@ -37,6 +37,7 @@ class ApplicationController extends Controller
         ]);
 
         // Send Job Applied Email
+        $jobPost->load('employer');
         Mail::to($request->user()->email)->send(new JobAppliedEmail($request->user(), $jobPost));
 
         // Return response

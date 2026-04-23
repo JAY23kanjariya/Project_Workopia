@@ -263,7 +263,7 @@ export default function CandidateViewJob() {
                         </div>
                         <h5 className="text-[11px] font-black uppercase tracking-widest text-slate-900">Need help?</h5>
                         <p className="text-xs text-slate-400 font-medium">Our support team is always available to help with your application.</p>
-                        <button className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-black transition-colors block mx-auto pt-2 border-b border-indigo-100">Contact Support</button>
+                        <Link href="/contact" className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-black transition-colors block mx-auto pt-2 border-b border-indigo-100">Contact Support</Link>
                     </div>
                 </div>
             </div>

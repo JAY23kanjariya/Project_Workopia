@@ -10,7 +10,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navbar */}
-      <nav className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+      <nav className="fixed top-0 inset-x-0 z-50 bg-blue-50 backdrop-blur-xl border-b border-blue-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white">
@@ -19,8 +19,9 @@ export default function HomePage() {
             <span className="text-lg font-black text-gray-900 tracking-tight">Workopia</span>
           </Link>
           <div className="flex items-center gap-3">
+            <Link href="/contact" className="px-5 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors hidden sm:block">Contact Us</Link>
             <Link href="/sign-in" className="px-5 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors">Sign In</Link>
-            <Link href="/signUp" className="px-5 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-gray-800 hover:shadow-lg transition-all active:scale-95">Get Started</Link>
+            <Link href="/sign-up" className="px-5 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-gray-800 hover:shadow-lg transition-all active:scale-95">Get Started</Link>
           </div>
         </div>
       </nav>
@@ -47,7 +48,7 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signUp" className="group flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-2xl text-sm font-extrabold hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 transition-all active:scale-95">
+            <Link href="/sign-up" className="group flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-2xl text-sm font-extrabold hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 transition-all active:scale-95">
               Start Your Journey
               <FiArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
@@ -189,7 +190,7 @@ export default function HomePage() {
             <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">Ready to Get Started?</h2>
             <p className="text-blue-100 max-w-lg mx-auto mb-10 font-medium">Join thousands of professionals who trust Workopia to connect them with the right opportunities.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/signUp" className="group flex items-center justify-center gap-2 px-8 py-4 bg-white text-blue-700 rounded-2xl text-sm font-extrabold hover:shadow-xl transition-all active:scale-95">
+              <Link href="/sign-up" className="group flex items-center justify-center gap-2 px-8 py-4 bg-white text-blue-700 rounded-2xl text-sm font-extrabold hover:shadow-xl transition-all active:scale-95">
                 Create Free Account <FiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link href="/sign-in" className="flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white border border-white/20 rounded-2xl text-sm font-extrabold hover:bg-white/20 transition-all active:scale-95">
@@ -201,7 +202,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-gray-100">
+      <footer className="py-12 px-6 border-t bg-blue-50 border-blue-200">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white">
@@ -210,8 +211,9 @@ export default function HomePage() {
             <span className="text-sm font-black text-gray-900">Workopia</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-gray-400 font-bold">
+            <Link href="/contact" className="hover:text-gray-600 transition-colors">Contact Us</Link>
             <Link href="/sign-in" className="hover:text-gray-600 transition-colors">Sign In</Link>
-            <Link href="/signUp" className="hover:text-gray-600 transition-colors">Register</Link>
+            <Link href="/sign-up" className="hover:text-gray-600 transition-colors">Register</Link>
           </div>
           <p className="text-xs text-gray-300 font-medium">© {new Date().getFullYear()} Workopia. All rights reserved.</p>
         </div>

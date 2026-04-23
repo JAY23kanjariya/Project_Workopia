@@ -11,9 +11,11 @@ use App\Http\Controllers\Employer\JobPostController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CandidateInformationController;
+use App\Http\Controllers\ContactController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/contact-us', [ContactController::class, 'send']);
 
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);

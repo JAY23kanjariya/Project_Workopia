@@ -1,12 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
-import { FiFacebook, FiTwitter, FiLinkedin, FiInstagram, FiMail, FiMapPin, FiPhone } from 'react-icons/fi';
+import { FiFacebook, FiTwitter, FiLinkedin, FiInstagram, FiMail, FiMapPin, FiPhone, FiMessageSquare } from 'react-icons/fi';
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="bg-white border-t border-gray-100 pt-16 pb-8 mt-auto">
+        <footer className="bg-white border-t border-blue-200 pt-16 pb-8 mt-auto">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
                     {/* Brand Section */}
@@ -61,9 +61,11 @@ export default function Footer() {
                                 <FiMapPin className="text-blue-600 mt-0.5 shrink-0" />
                                 <span>Workopia Demo <br />Gec,bhavnagar</span>
                             </li>
-                            <li className="flex items-center gap-3 text-sm text-gray-500">
-                                <FiMail className="text-blue-600 shrink-0" />
-                                <span>support@workopia.com</span>
+                            <li>
+                                <Link href="/contact" className="flex items-center gap-3 text-sm text-gray-500 hover:text-blue-600 transition-all">
+                                    <FiMessageSquare className="text-blue-600 shrink-0" />
+                                    <span>Contact Support</span>
+                                </Link>
                             </li>
                         </ul>
                     </div>

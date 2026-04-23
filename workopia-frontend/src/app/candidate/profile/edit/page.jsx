@@ -49,7 +49,7 @@ export default function EditProfilePage() {
         const fetchProfile = async () => {
             try {
                 const res = await getCandidateProfile();
-                if (res.data.success && res.data.data) {
+                if (res.data && res.data.data) {
                     const p = res.data.data;
                     setInitialValues({
                         phone_number: p.phone_number || "",
@@ -204,6 +204,10 @@ export default function EditProfilePage() {
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Direct Resume Link (Cloud)</label>
                                     </div>
                                     <Field name="resume_link" className="w-full px-6 py-4 bg-white/5 border border-white/5 rounded-2xl text-sm font-semibold focus:bg-white/10 transition-all outline-none text-white" placeholder="Google Drive / Dropbox Link" />
+                                    <p className="text-[9px] font-bold text-slate-500 mt-2 flex items-center gap-1 opacity-60">
+                                        <FiInfo className="text-indigo-400" />
+                                        Tip: Convert your PDF to a link at <a href="https://resumelink.co/" target="_blank" className="text-indigo-400 underline hover:text-white transition-colors">resumelink.co</a>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -227,7 +231,7 @@ export default function EditProfilePage() {
                                     className="flex-1 sm:flex-none flex items-center justify-center gap-3 px-10 py-5 bg-indigo-600 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-widest hover:bg-black hover:shadow-2xl hover:shadow-indigo-100 transition-all active:scale-95 disabled:opacity-50"
                                 >
                                     <FiSave className="w-5 h-5" />
-                                    Synchronize Profile
+                                    Update Profile
                                 </button>
                              </div>
                         </div>
