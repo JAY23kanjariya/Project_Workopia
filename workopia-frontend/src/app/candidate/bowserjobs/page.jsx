@@ -171,11 +171,12 @@ export default function BrowseJobs() {
 
                             {/* Meta Tags */}
                             <div className="flex flex-wrap gap-2 mb-5">
-                                <span className="px-3 py-1 bg-slate-50 text-slate-500 rounded-xl text-[11px] font-bold flex items-center gap-1"><FiMapPin className="w-3 h-3" />{job.location || "Remote"}</span>
-                                {job.category && (
-                                    <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-xl text-[11px] font-bold flex items-center gap-1"><FiLayers className="w-3 h-3" />{job.category.name}</span>
+                                <span className="px-3 py-1 bg-slate-50 text-slate-500 rounded-xl text-[11px] font-bold flex items-center gap-1"><FiMapPin className="w-3 h-3" />{job.city || job.location || "Remote"}</span>
+                                <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-xl text-[11px] font-bold flex items-center gap-1">{job.employment_type}</span>
+                                <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-xl text-[11px] font-bold flex items-center gap-1">{job.work_mode}</span>
+                                {job.salary_type !== "Negotiable" && job.min_salary && (
+                                    <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-xl text-[11px] font-bold flex items-center gap-1">₹{Number(job.min_salary).toLocaleString()}</span>
                                 )}
-                                <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-xl text-[11px] font-bold flex items-center gap-1"><FiClock className="w-3 h-3" />{new Date(job.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                             </div>
 
                             {/* Actions */}

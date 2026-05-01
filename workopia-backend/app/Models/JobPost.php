@@ -14,7 +14,33 @@ class JobPost extends Model
         'employer_id',
         'location',
         'description',
-        'status'
+        'status',
+        'employment_type',
+        'city',
+        'state',
+        'country',
+        'work_mode',
+        'salary_type',
+        'min_salary',
+        'max_salary',
+        'required_skills',
+        'min_experience',
+        'max_experience',
+        'education_qualification',
+        'openings_count',
+        'application_deadline',
+        'company_name',
+        'company_description',
+        'company_website'
+    ];
+
+    protected $casts = [
+        'application_deadline' => 'date',
+        'min_salary' => 'decimal:2',
+        'max_salary' => 'decimal:2',
+        'openings_count' => 'integer',
+        'min_experience' => 'integer',
+        'max_experience' => 'integer',
     ];
 
     // Relationships 
@@ -36,4 +62,3 @@ class JobPost extends Model
         return $this->hasMany(Application::class, 'job_post_id');
     }
 }
-

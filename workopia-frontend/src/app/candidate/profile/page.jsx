@@ -38,10 +38,10 @@ export default function CandidateProfilePage() {
                     setProfile(res.data.data);
                 }
             } catch (err) {
-                console.error("Profile Fetch Error:", err);
                 if (err.response?.status === 404) {
                     setError("PI_NOT_FOUND");
                 } else {
+                    console.error("Profile Fetch Error:", err);
                     setError("PI_ERROR");
                 }
             } finally {

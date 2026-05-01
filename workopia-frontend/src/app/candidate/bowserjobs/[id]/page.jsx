@@ -10,7 +10,7 @@ import { toast } from "react-hot-toast";
 import { 
     FiArrowLeft, FiBriefcase, FiMapPin, FiCalendar, FiCheckCircle, 
     FiUsers, FiLayers, FiDollarSign, FiClock, FiSend, FiFlag, 
-    FiShield, FiInfo, FiExternalLink 
+    FiShield, FiInfo, FiExternalLink, FiGlobe, FiTool, FiBookOpen 
 } from "react-icons/fi";
 
 export default function CandidateViewJob() {
@@ -43,7 +43,6 @@ export default function CandidateViewJob() {
 
     const handleApply = async () => {
         if (job.has_applied) return;
-
         const loadingToast = toast.loading("Securely submitting your application...");
         setApplying(true);
         try {
@@ -63,6 +62,12 @@ export default function CandidateViewJob() {
     if (loading) return <Loader text="Assembling job profile..." />;
     if (!job) return null;
 
+    const formattedSalary = () => {
+        if (job.salary_type === "Negotiable") return "Negotiable";
+        if (job.salary_type === "Fixed") return `₹${Number(job.min_salary).toLocaleString()}`;
+        return `₹${Number(job.min_salary).toLocaleString()} - ₹${Number(job.max_salary).toLocaleString()}`;
+    };
+
     return (
         <div className="max-w-6xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000 py-12 px-6">
             
@@ -76,6 +81,9 @@ export default function CandidateViewJob() {
                     <div className="flex flex-wrap items-center gap-3">
                         <Badge variant="indigo" className="px-3 py-1 text-[10px] uppercase font-black tracking-widest">
                             <FiInfo className="mr-1" /> Hiring Now
+                        </Badge>
+                        <Badge variant="purple" className="px-3 py-1 text-[10px] uppercase font-black tracking-widest">
+                            {job.employment_type}
                         </Badge>
                         <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
                             <FiClock className="w-3.5 h-3.5" /> Published {new Date(job.created_at).toLocaleDateString()}
@@ -96,25 +104,31 @@ export default function CandidateViewJob() {
             {/* 🚀 Main Header Section */}
             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-10">
                 <div className="flex items-start gap-6">
-                    <div className="shrink-0 w-20 h-20 rounded-[2rem] bg-white border-2 border-indigo-50 flex items-center justify-center text-indigo-600 shadow-xl shadow-indigo-100/50 text-3xl font-black ring-4 ring-indigo-50/30">
-                        {job.employer?.name?.[0].toUpperCase() || "W"}
+                    <div className="shrink-0 w-24 h-24 rounded-[2.5rem] bg-white border-2 border-indigo-50 flex items-center justify-center text-indigo-600 shadow-xl shadow-indigo-100/50 text-4xl font-black ring-4 ring-indigo-50/30">
+                        {job.company_name?.[0].toUpperCase() || job.employer?.name?.[0].toUpperCase() || "W"}
                     </div>
-                    <div className="space-y-2">
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                    <div className="space-y-3">
+                        <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
                             {job.title}
                         </h1>
-                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-1">
                             <div className="flex items-center gap-2 text-sm font-extrabold text-slate-600">
-                                <FiBriefcase className="w-4 h-4 text-indigo-500" />
-                                {job.employer?.name}
+                                <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                    <FiGlobe className="w-4 h-4" />
+                                </div>
+                                {job.company_name}
                             </div>
                             <div className="flex items-center gap-2 text-sm font-extrabold text-slate-600">
-                                <FiMapPin className="w-4 h-4 text-rose-500" />
-                                {job.location || "Remote Workspace"}
+                                <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500">
+                                    <FiMapPin className="w-4 h-4" />
+                                </div>
+                                {job.city}, {job.state}
                             </div>
                             <div className="flex items-center gap-2 text-sm font-extrabold text-slate-600">
-                                <FiLayers className="w-4 h-4 text-emerald-500" />
-                                {job.category?.name || "Uncategorized"}
+                                <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                                    <FiLayers className="w-4 h-4" />
+                                </div>
+                                {job.work_mode}
                             </div>
                         </div>
                     </div>
@@ -127,7 +141,7 @@ export default function CandidateViewJob() {
                         className={`group px-10 py-5 rounded-[2rem] text-sm font-black transition-all flex items-center gap-3 shadow-2xl relative overflow-hidden ${
                             job.has_applied 
                             ? "bg-emerald-500 text-white shadow-emerald-200 cursor-default" 
-                            : "bg-black text-white hover:bg-indigo-600 hover:shadow-indigo-200 active:scale-95"
+                            : "bg-black text-white hover:bg-indigo-600 hover:shadow-indigo-200 active:scale-95 w-full lg:w-auto justify-center"
                         }`}
                     >
                         {job.has_applied ? (
@@ -138,7 +152,7 @@ export default function CandidateViewJob() {
                         ) : (
                             <>
                                 <FiSend className="w-5 h-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                                Apply for this Position
+                                Apply for Position
                             </>
                         )}
                     </button>
@@ -151,52 +165,84 @@ export default function CandidateViewJob() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 {/* 📝 Left: Job Content */}
                 <div className="lg:col-span-8 space-y-10">
-                    <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden p-12 ring-1 ring-slate-100 relative">
-                        {/* Decorative background element */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-[5rem] -mr-10 -mt-10 opacity-50"></div>
-                        
-                        <div className="flex items-center gap-4 mb-10 relative">
+                    
+                    {/* Key Requirements Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-white p-6 rounded-3xl border border-slate-100 text-center space-y-2 group hover:border-indigo-100 transition-all">
+                            <FiUsers className="w-6 h-6 mx-auto text-indigo-400 group-hover:scale-110 transition-transform" />
+                            <p className="text-xs font-black text-slate-900">{job.openings_count} Openings</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-3xl border border-slate-100 text-center space-y-2 group hover:border-emerald-100 transition-all">
+                            <FiTool className="w-6 h-6 mx-auto text-emerald-400 group-hover:scale-110 transition-transform" />
+                            <p className="text-xs font-black text-slate-900">{job.min_experience}-{job.max_experience} Yrs Exp</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-3xl border border-slate-100 text-center space-y-2 group hover:border-rose-100 transition-all">
+                            <FiBookOpen className="w-6 h-6 mx-auto text-rose-400 group-hover:scale-110 transition-transform" />
+                            <p className="text-xs font-black text-slate-900 truncate px-1">{job.education_qualification}</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-3xl border border-slate-100 text-center space-y-2 group hover:border-amber-100 transition-all">
+                            <FiCalendar className="w-6 h-6 mx-auto text-amber-400 group-hover:scale-110 transition-transform" />
+                            <p className="text-xs font-black text-slate-900">{job.application_deadline ? new Date(job.application_deadline).toLocaleDateString() : 'Rolling'}</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden p-10 sm:p-14 ring-1 ring-slate-100 relative">
+                        <div className="flex items-center gap-4 mb-10 pb-10 border-b border-slate-50">
                             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
                                 <FiInfo className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Job Description & Scope</h3>
-                                <p className="text-xs font-bold text-slate-400">Detailed overview of responsibilities and requirements.</p>
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Job Scope & Requirements</h3>
+                                <p className="text-xs font-bold text-slate-400">Comprehensive breakdown of the opportunity.</p>
                             </div>
                         </div>
                         
-                        <div className="prose prose-indigo max-w-none text-slate-600 font-medium leading-loose whitespace-pre-line text-[16px] relative">
-                            {job.description}
+                        <div className="space-y-12">
+                            <div className="prose prose-indigo max-w-none text-slate-600 font-medium leading-loose whitespace-pre-line text-[16px]">
+                                {job.description}
+                            </div>
+
+                            <div className="space-y-6 pt-10 border-t border-slate-50">
+                                <h4 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 italic">Preferred Skills</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {job.required_skills?.split(',').map((skill, i) => (
+                                        <div key={i} className="px-5 py-3 bg-slate-50 text-slate-600 text-xs font-black rounded-2xl border border-slate-100 hover:border-indigo-100 hover:bg-white transition-all cursor-default">
+                                            {skill.trim()}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    {/* Additional highlight card */}
-                    <div className="bg-indigo-600 rounded-[2.5rem] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative group">
-                        <FiBriefcase className="absolute -right-10 -bottom-10 w-48 h-48 opacity-10 group-hover:scale-110 transition-transform duration-700" />
-                        <div className="relative">
-                            <h4 className="text-xl font-black tracking-tight">Ready to join {job.employer?.name}?</h4>
-                            <p className="text-indigo-100 text-sm font-medium mt-1">Join a community of thousands of talented professionals.</p>
-                        </div>
-                        <button 
-                            onClick={handleApply}
-                            disabled={job.has_applied}
-                            className={`px-8 py-4 bg-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl transition-all active:scale-95 relative ${
-                                job.has_applied ? "text-emerald-500 cursor-not-allowed" : "text-indigo-600 hover:bg-slate-50"
-                            }`}
-                        >
-                            {job.has_applied ? "Application Sent" : "Submit Details"}
-                        </button>
+
+                    {/* Company Information */}
+                    <div className="bg-slate-50 rounded-[3rem] p-10 sm:p-14 space-y-8 border border-slate-100">
+                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-indigo-600 font-black text-xl">
+                                    {job.company_name?.[0]}
+                                </div>
+                                <h3 className="text-2xl font-black text-slate-950 uppercase tracking-tight">About {job.company_name}</h3>
+                            </div>
+                            {job.company_website && (
+                                <a href={job.company_website} target="_blank" className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-indigo-600 hover:text-black transition-colors">
+                                    Official Website <FiExternalLink className="w-4 h-4" />
+                                </a>
+                            )}
+                         </div>
+                         <p className="text-slate-600 font-medium leading-relaxed">
+                            {job.company_description}
+                         </p>
                     </div>
                 </div>
 
-                {/* 📊 Right: Sidebar Stats & Info */}
+                {/* 📊 Right: Sidebar Stats */}
                 <div className="lg:col-span-4 space-y-8">
                     
-                    {/* Application Stats */}
+                    {/* Insights */}
                     <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 space-y-6 ring-1 ring-slate-100">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-50 pb-4">Activity Insights</h3>
-                        
-                        <div className="space-y-6">
+                        <div className="space-y-6 pb-2">
                             <div className="flex items-center justify-between group">
                                 <div className="flex items-center gap-3">
                                     <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform font-bold">
@@ -204,12 +250,10 @@ export default function CandidateViewJob() {
                                     </div>
                                     <div>
                                         <p className="text-sm font-black text-slate-900">{job.applications_count || 0}</p>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Applicants</p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Applicants</p>
                                     </div>
                                 </div>
-                                <div className="text-blue-500 opacity-20"><FiUsers className="w-6 h-6" /></div>
                             </div>
-
                             <div className="flex items-center justify-between group">
                                 <div className="flex items-center gap-3">
                                     <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform">
@@ -217,40 +261,55 @@ export default function CandidateViewJob() {
                                     </div>
                                     <div>
                                         <p className="text-sm font-black text-slate-900">Verified</p>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Employer Status</p>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Posted by {job.employer?.name}</p>
                                     </div>
                                 </div>
-                                <div className="text-emerald-500 opacity-20"><FiShield className="w-6 h-6" /></div>
                             </div>
                         </div>
+
+                        {/* Apply CTA (Mobile optimized display) */}
+                        {!job.has_applied && (
+                            <button onClick={handleApply} className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-indigo-100 active:scale-95">
+                                Submit Application
+                            </button>
+                        )}
                     </div>
 
-                    {/* Quick Metadata List */}
-                    <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white space-y-6 shadow-2xl shadow-slate-200">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 border-b border-white/5 pb-4">Quick Breakdown</h3>
+                    {/* Metadata Card */}
+                    <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white space-y-6 shadow-2xl shadow-slate-200 overflow-hidden relative">
+                        <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12">
+                            <FiDollarSign className="w-32 h-32" />
+                        </div>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 border-b border-white/5 pb-4 relative">Quick Stats</h3>
                         
-                        <div className="space-y-5">
+                        <div className="space-y-8 relative">
                             <div className="flex items-start gap-4">
-                                <FiLayers className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                                <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-indigo-400">
+                                    <FiLayers className="w-5 h-5" />
+                                </div>
                                 <div>
-                                    <p className="text-xs font-black tracking-widest uppercase opacity-50">Department</p>
-                                    <p className="text-sm font-bold mt-0.5">{job.category?.name || "General Office"}</p>
+                                    <p className="text-[10px] font-black tracking-widest uppercase opacity-40">Role Type</p>
+                                    <p className="text-sm font-bold mt-1">{job.employment_type}</p>
                                 </div>
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <FiDollarSign className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                                <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-emerald-400">
+                                    <FiDollarSign className="w-5 h-5" />
+                                </div>
                                 <div>
-                                    <p className="text-xs font-black tracking-widest uppercase opacity-50">Compensation</p>
-                                    <p className="text-sm font-bold mt-0.5">{job.salary || "Competitive Salary"}</p>
+                                    <p className="text-[10px] font-black tracking-widest uppercase opacity-40">Annual CTC</p>
+                                    <p className="text-lg font-black mt-1 text-emerald-50">{formattedSalary()}</p>
                                 </div>
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <FiMapPin className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                                <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-rose-400">
+                                    <FiMapPin className="w-5 h-5" />
+                                </div>
                                 <div>
-                                    <p className="text-xs font-black tracking-widest uppercase opacity-50">Work Environment</p>
-                                    <p className="text-sm font-bold mt-0.5">{job.location || "Remote/Office"}</p>
+                                    <p className="text-[10px] font-black tracking-widest uppercase opacity-40">Settlement</p>
+                                    <p className="text-sm font-bold mt-1 capitalize">{job.location}</p>
                                 </div>
                             </div>
                         </div>
@@ -258,9 +317,6 @@ export default function CandidateViewJob() {
 
                     {/* Assistance Card */}
                     <div className="p-8 bg-white rounded-[2.5rem] border border-slate-100 text-center space-y-3 ring-1 ring-slate-100 shadow-sm">
-                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
-                            <FiInfo className="w-6 h-6" />
-                        </div>
                         <h5 className="text-[11px] font-black uppercase tracking-widest text-slate-900">Need help?</h5>
                         <p className="text-xs text-slate-400 font-medium">Our support team is always available to help with your application.</p>
                         <Link href="/contact" className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-black transition-colors block mx-auto pt-2 border-b border-indigo-100">Contact Support</Link>

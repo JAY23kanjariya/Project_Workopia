@@ -153,18 +153,22 @@ export default function EditProfilePage() {
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Educational Institution</label>
                                     <Field name="college_name" className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl text-sm font-semibold focus:bg-white focus:ring-4 focus:ring-indigo-50 transition-all outline-none" placeholder="University of Technology" />
+                                    {errors.college_name && touched.college_name && <p className="text-[10px] font-bold text-rose-500 pl-1">{errors.college_name}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Degree Earned</label>
                                     <Field name="degree" className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl text-sm font-semibold focus:bg-white focus:ring-4 focus:ring-indigo-50 transition-all outline-none" placeholder="Bachelor of Science in CS" />
+                                    {errors.degree && touched.degree && <p className="text-[10px] font-bold text-rose-500 pl-1">{errors.degree}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">CGPA / Grade</label>
-                                    <Field name="cgpa" className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl text-sm font-semibold focus:bg-white focus:ring-4 focus:ring-indigo-50 transition-all outline-none" placeholder="e.g. 3.8 / 4.0" />
+                                    <Field name="cgpa" className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl text-sm font-semibold focus:bg-white focus:ring-4 focus:ring-indigo-50 transition-all outline-none" placeholder="e.g. 9.0 / 10" />
+                                    {errors.cgpa && touched.cgpa && <p className="text-[10px] font-bold text-rose-500 pl-1">{errors.cgpa}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Years of Experience</label>
                                     <Field name="experience" className="w-full px-6 py-4 bg-slate-50 border border-transparent rounded-2xl text-sm font-semibold focus:bg-white focus:ring-4 focus:ring-indigo-50 transition-all outline-none" placeholder="e.g. 5" />
+                                    {errors.experience && touched.experience && <p className="text-[10px] font-bold text-rose-500 pl-1">{errors.experience}</p>}
                                 </div>
                             </div>
                         </div>
